@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Grid, Card, CardContent, CardMedia, Typography, Button, Box, CssBaseline } from '@mui/material';
+import { Container, Grid, Card, CardContent, CardMedia, Typography, Button, Box, CssBaseline, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Link from 'next/link';
 import Navbar from '../app/components/Navbar';
@@ -15,6 +15,9 @@ interface Product {
 
 export default function Index() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
@@ -30,11 +33,28 @@ export default function Index() {
       setProducts(data);
       console.log(data);
     });
+    fetch("https://fakestoreapi.com/products/categories").then(async (res) => {
+      const data = await res.json();
+      setCategories(data);
+      console.log(data);
+    });
   }, []);
 
   useEffect(() => {
     localStorage.setItem('darkmode', darkMode.toString());
   }, [darkMode]);
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategories(prevSelected =>
+      prevSelected.includes(category)
+        ? prevSelected.filter(c => c !== category)
+        : [...prevSelected, category]
+    );
+  };
+  const filteredProducts = products.filter(product =>
+    (selectedCategories.length === 0 || selectedCategories.includes(product.category)) &&
+    product.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const lightTheme = createTheme({
     palette: {
@@ -75,8 +95,30 @@ export default function Index() {
           <Typography variant="h4" component="h1" gutterBottom>
             Products
           </Typography>
+          <TextField
+            fullWidth
+            label="Search Products"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ mb: 4 }}
+          />
+          <FormGroup row>
+            {categories.map(category => (
+              <FormControlLabel
+                key={category}
+                control={
+                  <Checkbox
+                    checked={selectedCategories.includes(category)}
+                    onChange={() => handleCategoryChange(category)}
+                  />
+                }
+                label={category}
+              />
+            ))}
+          </FormGroup>
           <Grid container spacing={4}>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <Grid item key={product.id} xs={12} sm={6} md={4}>
                 <Link
                   href={{
@@ -102,7 +144,11 @@ export default function Index() {
                       </Typography>
                     </CardContent>
                     <Box sx={{ p: 2 }}>
-                      <Button variant="contained" color="primary" fullWidth>
+                      <Button variant="contained" color="primary" fullWidth
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}>
                         Add to Cart
                       </Button>
                     </Box>

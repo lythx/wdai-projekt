@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const Sequelize = require('sequelize');
-const { generateToken } = require("./tokenService.js")
+const { generateToken, validateAndParseToken } = require("./tokenService.js")
 const cors = require("cors")
 
 const app = express();
@@ -26,7 +26,13 @@ const User = db.define('User', {
     type: Sequelize.STRING,
     allowNull: false
   }
-});
+})
+const LoggedOutToken = db.define('LoggedOutToken', {
+  token: {
+    type: Sequelize.STRING,
+    allowNull: false
+  }
+})
 db.sync()
 
 app.use(express.json());
@@ -35,7 +41,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post("/api/register", async (req, res) => {
-  console.log({ email: req.body.email, password: req.body.password, name: req.body.name, surname: req.body.surname })
+  const sameEmail = await User.findOne(
+    { where: { email: req.body.email } }
+  ).catch(err => err)
+  if (sameEmail !== null) {
+    res.status(400).send("User already exists")
+    return
+  }
   const newUser = await User.create(
     { email: req.body.email, password: req.body.password, name: req.body.name, surname: req.body.surname }
   ).catch(err => err)
@@ -56,7 +68,29 @@ app.post("/api/login", async (req, res) => {
     return
   }
   const token = generateToken(user.id)
-  res.send(token)
+  res.send({ token })
+})
+
+app.post("/api/logout", async (req, res) => {
+  const status = await LoggedOutToken.create(
+    { token: req.body.token }
+  ).catch(err => err)
+  if (status instanceof Error) {
+    res.status(400).send("Failed to logout")
+    return
+  }
+  res.sendStatus(200)
+})
+
+app.post("/api/validate", async (req, res) => {
+  const loggedOut = await LoggedOutToken.findOne(
+    { token: req.header("token") }
+  ).catch(err => err)
+  if (loggedOut !== null || !validateAndParseToken(req)) {
+    res.status(400).send("Invalid token")
+    return
+  }
+  res.sendStatus(200)
 })
 
 app.listen(5000, () => {

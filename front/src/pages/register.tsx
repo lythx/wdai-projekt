@@ -9,23 +9,40 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const router = useRouter();
+  const [registerError, setRegisterError] = useState('')
 
-  const handleSubmit = () => {
-    console.log('1123')
+  const router = useRouter()
+
+  const handleRegister = async () => {
     const headers = new Headers({
       "Content-Type": "application/json",
       'Access-Control-Allow-Origin': "http://localhost:5000",
     })
-    fetch("http://localhost:5000/api/register", {
+    const registerRes = await fetch("http://localhost:5000/api/register", {
       method: "POST", body: JSON.stringify({
         name: name, surname, email, password
       }), headers
     })
+    if (!registerRes.ok) {
+      const error = await registerRes.text()
+      if (error === "User already exists") {
+        setRegisterError(error)
+      } else {
+        setRegisterError("Failed to create user")
+      }
+      return
+    }
+    const loginRes = await fetch("http://localhost:5000/api/login", {
+      method: "POST", body: JSON.stringify({
+        email, password
+      }), headers
+    })
+    const data = await loginRes.json()
+    document.cookie = `token=${data.token}; expires=${new Date(Date.now() + 1000 * 60 * 60)}; path=/`
   };
 
   const handleLoginRedirect = () => {
-    // router.push('/login');
+    router.push('/login');
   };
 
   const [darkMode, setDarkMode] = useState(false);
@@ -57,59 +74,58 @@ export default function Register() {
           <Typography variant="h4" component="h1" gutterBottom>
             Register
           </Typography>
-          <form onSubmit={handleSubmit}>
-            <Box sx={{ mb: 2 }}>
-              <TextField
-                fullWidth
-                label="Name"
-                type="text"
-                value={name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-              />
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <TextField
-                fullWidth
-                label="Surname"
-                type="text"
-                value={surname}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSurname(e.target.value)}
-              />
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                required
-              />
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <TextField
-                fullWidth
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                required
-              />
-            </Box>
-            <Box sx={{ mb: 2 }}>
-              <TextField
-                fullWidth
-                label="Confirm Password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </Box>
-            <Button variant="contained" color="primary" type="submit">
-              Register
-            </Button>
-          </form>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Name"
+              type="text"
+              value={name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+            />
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Surname"
+              type="text"
+              value={surname}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSurname(e.target.value)}
+            />
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              required
+            />
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              required
+            />
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </Box>
+          <Button variant="contained" color="primary" type="submit" onClick={handleRegister}>
+            Register
+          </Button>
+          <Typography sx={{ mt: 2 }} variant="body2" color={"red"}>{registerError}</Typography>
           <Box sx={{ mt: 2 }}>
             <Typography variant="body2">
               Already have an account?{' '}
