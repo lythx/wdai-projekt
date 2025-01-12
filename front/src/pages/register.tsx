@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Link, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import { useRouter } from 'next/router';
 import Navbar from '@/app/components/Navbar';
+import utils from '@/app/utils/utils';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -38,7 +39,7 @@ export default function Register() {
       }), headers
     })
     const data = await loginRes.json()
-    document.cookie = `token=${data.token}; expires=${new Date(Date.now() + 1000 * 60 * 60)}; path=/`
+    utils.setTokenCookie(data.token)
   };
 
   const handleLoginRedirect = () => {
@@ -49,17 +50,7 @@ export default function Register() {
   useEffect(() => {
     setDarkMode(localStorage.getItem("darkmode") === "true")
   }, [])
-  const lightTheme = createTheme({
-    palette: {
-      mode: 'light',
-    },
-  });
-  const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-    },
-  });
-  const theme = darkMode ? darkTheme : lightTheme;
+  const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme()
   const handleThemeToggle = () => {
     setDarkMode(!darkMode);
     localStorage.setItem("darkmode", !darkMode ? "true" : "false")
@@ -80,7 +71,7 @@ export default function Register() {
               label="Name"
               type="text"
               value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
             />
           </Box>
           <Box sx={{ mb: 2 }}>
@@ -89,7 +80,7 @@ export default function Register() {
               label="Surname"
               type="text"
               value={surname}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSurname(e.target.value)}
+              onChange={(e) => setSurname(e.target.value)}
             />
           </Box>
           <Box sx={{ mb: 2 }}>
@@ -98,7 +89,7 @@ export default function Register() {
               label="Email"
               type="email"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </Box>
@@ -108,7 +99,7 @@ export default function Register() {
               label="Password"
               type="password"
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </Box>
@@ -118,7 +109,7 @@ export default function Register() {
               label="Confirm Password"
               type="password"
               value={confirmPassword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </Box>

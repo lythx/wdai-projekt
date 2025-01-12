@@ -3,19 +3,42 @@ import { useRouter } from 'next/router';
 import { Container, Typography, Box, Card, CardContent, CardMedia, CssBaseline } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Navbar from '../../app/components/Navbar';
+import utils from '@/app/utils/utils';
 
 export default function ProductDetails() {
   const router = useRouter();
-  const { id, title, price, description, category, image } = router.query;
+  const [id, setId] = useState(NaN)
+  const [title, setTitle] = useState('')
+  const [price, setPrice] = useState(0)
+  const [description, setDescription] = useState('')
+  const [category, setCategory] = useState('')
+  const [image, setImage] = useState('')
+  const [quantity, setQuantity] = useState('')
+  const [fetchCompleted, setFetchCompleted] = useState(false)
 
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
+    if (!router.isReady) {
+      return
+    }
     const savedTheme = localStorage.getItem('darkmode');
     if (savedTheme) {
       setDarkMode(savedTheme === 'true');
     }
-  }, []);
+    const { id } = router.query;
+    setId(Number(id))
+    fetch(`http://localhost:5000/api/product/${id}`, { headers: utils.getHeaders() }).then(async (res) => {
+      const data = await res.json();
+      setTitle(data.title);
+      setPrice(data.price)
+      setDescription(data.description)
+      setCategory(data.category)
+      setImage(data.image)
+      setQuantity(data.quantity)
+      setFetchCompleted(true)
+    });
+  }, [router.isReady]);
 
   useEffect(() => {
     localStorage.setItem('darkmode', darkMode.toString());
@@ -71,6 +94,9 @@ export default function ProductDetails() {
               </Typography>
               <Typography variant="h6" color="text.primary">
                 ${price}
+              </Typography>
+              <Typography variant="h6" color="text.primary">
+                In stock: {quantity}
               </Typography>
               <Typography variant="body1" sx={{ mt: 2 }}>
                 {description}

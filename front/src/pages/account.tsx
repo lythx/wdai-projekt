@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Container, TextField, Button, Box, Typography, CssBaseline } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Navbar from '../app/components/Navbar';
-import { validateToken } from '../app/utils/validate-token';
+import utils from '../app/utils/utils';
 
 const theme = createTheme();
 
@@ -16,7 +16,7 @@ export default function Account() {
 
   useEffect(() => {
     // Check if the user is logged in
-    validateToken().then(isValid => {
+    utils.validateToken().then(isValid => {
       setIsLoggedIn(isValid);
       if (isValid) {
         // Fetch user data from API and set it to state
@@ -44,7 +44,7 @@ export default function Account() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Navbar />
+      {/* <Navbar /> */}
       <Container component="main" maxWidth="xs">
         <Box
           sx={{

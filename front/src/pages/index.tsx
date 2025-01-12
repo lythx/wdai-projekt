@@ -3,15 +3,10 @@ import { Container, Grid, Card, CardContent, CardMedia, Typography, Button, Box,
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Link from 'next/link';
 import Navbar from '../app/components/Navbar';
+import utils from '@/app/utils/utils';
+import { Product } from '@/app/types';
 
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  description: string;
-  category: string;
-  image: string;
-}
+
 
 export default function Index() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,21 +14,23 @@ export default function Index() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [cartItems, setCartItems] = useState<Product[]>([])
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('darkmode');
     if (savedTheme) {
       setDarkMode(savedTheme === 'true');
     }
+    setCartItems(utils.getCart())
   }, []);
 
   useEffect(() => {
-    fetch("https://fakestoreapi.com/products").then(async (res) => {
+    fetch("http://localhost:5000/api/products", { headers: utils.getHeaders() }).then(async (res) => {
       const data = await res.json();
       setProducts(data);
       console.log(data);
     });
-    fetch("https://fakestoreapi.com/products/categories").then(async (res) => {
+    fetch("http://localhost:5000/api/categories").then(async (res) => {
       const data = await res.json();
       setCategories(data);
       console.log(data);
@@ -56,35 +53,22 @@ export default function Index() {
     product.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const lightTheme = createTheme({
-    palette: {
-      mode: 'light',
-      primary: {
-        main: '#1976d2', // Custom primary color
-      },
-      secondary: {
-        main: '#dc004e', // Custom secondary color
-      },
-    },
-  });
-
-  const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#90caf9', // Custom primary color
-      },
-      secondary: {
-        main: '#f48fb1', // Custom secondary color
-      },
-    },
-  });
-
-  const theme = darkMode ? darkTheme : lightTheme;
-
+  const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme()
   const handleThemeToggle = () => {
     setDarkMode(!darkMode);
   };
+
+  const handleAddToCart = (product: Product) => {
+    const cart = [...cartItems, { ...product, quantity: 1, totalQuantity: product.quantity }]
+    setCartItems(cart)
+    utils.setCart(cart)
+  }
+
+  const handleRemoveFromCart = (product: Product) => {
+    const cart = cartItems.filter(a => a.id !== product.id)
+    setCartItems(cart)
+    utils.setCart(cart)
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -142,14 +126,20 @@ export default function Index() {
                       <Typography variant="h6" color="text.primary">
                         ${product.price}
                       </Typography>
+                      <Typography variant="h6" color="text.primary">
+                        In stock: {product.quantity}
+                      </Typography>
                     </CardContent>
                     <Box sx={{ p: 2 }}>
                       <Button variant="contained" color="primary" fullWidth
                         onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}>
-                        Add to Cart
+                          e.stopPropagation()
+                          e.preventDefault()
+                          !cartItems.some(a => a.id === product.id) ?
+                            handleAddToCart(product) : handleRemoveFromCart(product)
+                        }}
+                        sx={{ background: !cartItems.some(a => a.id === product.id) ? '' : '#D84040' }}>
+                        {!cartItems.some(a => a.id === product.id) ? "Add to Cart" : "Remove from Cart"}
                       </Button>
                     </Box>
                   </Card>

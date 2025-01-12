@@ -1,43 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Container, Typography, Box, List, ListItem, ListItemText, Divider, Paper, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from '@/app/components/Navbar';
-import { validateToken } from '@/app/utils/validate-token';
+import utils from '@/app/utils/utils';
 import { useRouter } from 'next/router';
+import { Product } from '@/app/types';
 
-interface Item {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-}
 
 interface Order {
   id: number;
   date: string;
-  items: Item[];
+  items: Product[];
 }
 
 export default function History() {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 1,
-      date: '2023-10-01',
-      items: [
-        { id: 1, name: 'Item 1', quantity: 2, price: 10 },
-        { id: 2, name: 'Item 2', quantity: 1, price: 20 },
-      ],
-    },
-    {
-      id: 2,
-      date: '2023-10-05',
-      items: [
-        { id: 3, name: 'Item 3', quantity: 3, price: 15 },
-        { id: 4, name: 'Item 4', quantity: 1, price: 25 },
-      ],
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const getTotalPrice = (items: Item[]): number => {
+  const getTotalPrice = (items: Product[]): number => {
     return items.reduce((total, item) => total + item.quantity * item.price, 0);
   };
 
@@ -45,17 +23,7 @@ export default function History() {
   useEffect(() => {
     setDarkMode(localStorage.getItem("darkmode") === "true")
   }, [])
-  const lightTheme = createTheme({
-    palette: {
-      mode: 'light',
-    },
-  });
-  const darkTheme = createTheme({
-    palette: {
-      mode: 'dark',
-    },
-  });
-  const theme = darkMode ? darkTheme : lightTheme;
+  const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme();
   const handleThemeToggle = () => {
     setDarkMode(!darkMode);
     localStorage.setItem("darkmode", !darkMode ? "true" : "false")
@@ -63,7 +31,7 @@ export default function History() {
 
   const [tokenStatus, setTokenStatus] = useState<"valid" | "invalid" | "waiting">("waiting")
   useEffect(() => {
-    validateToken().then((isValid) => {
+    utils.validateToken().then((isValid) => {
       if (isValid) {
         setTokenStatus("valid")
       } else {
@@ -97,7 +65,7 @@ export default function History() {
                     <div key={item.id}>
                       <ListItem>
                         <ListItemText
-                          primary={item.name}
+                          primary={item.title}
                           secondary={`Quantity: ${item.quantity} - Price: $${item.price}`}
                         />
                       </ListItem>
