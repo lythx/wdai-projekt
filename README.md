@@ -6,7 +6,7 @@ Aby skonfigurować projekt, wykonaj następujące kroki:
 
 1. Sklonuj repozytorium:
     ```sh
-    git clone <adres-repozytorium>
+    git clone https://github.com/lythx/wdai-projekt.git
     ```
 2. Przejdź do katalogu `back` i zainstaluj zależności:
     ```sh
