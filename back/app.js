@@ -25,6 +25,10 @@ const User = db.define('User', {
   surname: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  isAdmin: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false
   }
 })
 const LoggedOutToken = db.define('LoggedOutToken', {
@@ -40,6 +44,32 @@ const Order = db.define('Order', {
   },
   order: {
     type: Sequelize.TEXT,
+    allowNull: false
+  }
+})
+const Opinion = db.define('Opinion', {
+  user: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  product: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  stars: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  text: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  name: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  surname: {
+    type: Sequelize.STRING,
     allowNull: false
   }
 })
@@ -62,7 +92,7 @@ app.post("/api/register", async (req, res) => {
     return
   }
   const newUser = await User.create(
-    { email: req.body.email, password: req.body.password, name: req.body.name, surname: req.body.surname }
+    { email: req.body.email, password: req.body.password, name: req.body.name, surname: req.body.surname, isAdmin: false }
   ).catch(err => err)
   if (newUser instanceof Error) {
     res.status(400).send("Incorrect data in body")
@@ -86,12 +116,14 @@ app.post("/api/login", async (req, res) => {
 
 app.post("/api/logout", async (req, res) => {
   const status = await LoggedOutToken.create(
-    { token: req.body.token }
+    { token: req.header("token") ?? "" }
   ).catch(err => err)
+  console.log(status)
   if (status instanceof Error) {
     res.status(400).send("Failed to logout")
     return
   }
+  db.sync()
   res.sendStatus(200)
 })
 
@@ -106,11 +138,27 @@ async function validateAndGetUser(req) {
 }
 
 app.post("/api/validate", async (req, res) => {
-  if (!checkIfValidAndNotLoggedOut(req.header("token"))) {
+  if (!(await validateAndGetUser(req))) {
     res.status(400).send("Invalid token")
     return
   }
   res.sendStatus(200)
+})
+
+app.get("/api/user", async (req, res) => {
+  const r = await validateAndGetUser(req)
+  if (!r) {
+    res.status(400).send("Invalid token")
+    return
+  }
+  const user = await User.findOne(
+    { where: { id: r.id } }
+  ).catch(err => err)
+  if (user === null || user instanceof Error) {
+    res.status(400).send("Invalid token")
+    return
+  }
+  res.status(200).send(JSON.stringify(user))
 })
 
 app.get("/api/products", async (req, res) => {
@@ -131,7 +179,7 @@ app.get("/api/product/:id", async (req, res) => {
 })
 
 app.post("/api/order", async (req, res) => {
-  const user = validateAndGetUser(req)
+  const user = await validateAndGetUser(req)
   if (user === false) {
     res.sendStatus(403)
     return
@@ -144,14 +192,15 @@ app.post("/api/order", async (req, res) => {
       product.quantity -= orderedProduct.quantity
     }
   }
-  Order.create(
-    { user: user.id, order: JSON.stringify(req.body.products) }
+  await Order.create(
+    { user: user.id, order: JSON.stringify(req.body) }
   ).catch(err => err)
+  db.sync()
   res.sendStatus(200)
 })
 
 app.get("/api/orders", async (req, res) => {
-  const user = validateAndGetUser(req)
+  const user = await validateAndGetUser(req)
   if (user === false) {
     res.sendStatus(403)
     return
@@ -163,7 +212,48 @@ app.get("/api/orders", async (req, res) => {
     res.sendStatus(400)
     return
   }
-  res.status(200).send(JSON.stringify(orders))
+  res.status(200).send(JSON.stringify(orders.map(a => ({
+    id: a.id,
+    date: a.createdAt,
+    items: JSON.parse(a.order)
+  }))))
+})
+
+app.post('/api/opinion', async (req, res) => {
+  const user = await validateAndGetUser(req)
+  console.log('===================')
+  console.log(user)
+  console.log(req.body)
+  if (user === false) {
+    res.sendStatus(403)
+    return
+  }
+  const status = await Opinion.create(
+    { product: req.body.product, user: user.id, stars: req.body.stars, text: req.body.text, name: req.body.name, surname: req.body.surname }
+  ).catch(err => err)
+  console.log(status)
+  db.sync()
+  res.sendStatus(200)
+})
+
+app.delete('/api/opinion', async (req, res) => {
+  const user = await validateAndGetUser(req)
+  if (user === false) {
+    res.sendStatus(403)
+    return
+  }
+  const opinion = await Opinion.findOne(
+    { id: req.body.id }
+  ).catch(err => err)
+  console.log(await opinion.destroy())
+  db.sync()
+  res.sendStatus(200)
+})
+
+app.get('/api/opinions/:product', async (req, res) => {
+  res.status(200).send(await Opinion.findAll(
+    { where: { product: Number(req.params.product) } }
+  ))
 })
 
 app.listen(5000, async () => {
@@ -173,6 +263,18 @@ app.listen(5000, async () => {
   const categoriesRes = await fetch("https://fakestoreapi.com/products/categories")
   const categoriesData = await categoriesRes.json()
   categories = categoriesData
+  console.log('api fetch complete')
+
+  // await User.create(
+  //   { email: "mateusz.jarosz@agh.edu.pl", password: "admin", name: "Mateusz", surname: "Jarosz", isAdmin: true })
+  // await User.create(
+  //   { email: "szuk@student.agh.edu.pl", password: "admin", name: "Szymon", surname: "Żuk", isAdmin: true })
+  // await User.create(
+  //   { email: "zak@student.agh.edu.pl", password: "admin", name: "Dawid", surname: "Żak", isAdmin: true })
+
 })
 
 module.exports = app;
+
+
+

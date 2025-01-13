@@ -8,7 +8,7 @@ import { Product } from '@/app/types';
 
 interface Order {
   id: number;
-  date: string;
+  date: Date;
   items: Product[];
 }
 
@@ -21,7 +21,15 @@ export default function History() {
 
   const [darkMode, setDarkMode] = useState(false);
   useEffect(() => {
+    localStorage.setItem('fallbackUrl', '/history')
     setDarkMode(localStorage.getItem("darkmode") === "true")
+    fetch("http://localhost:5000/api/orders", { headers: utils.getHeadersWithToken() }).then(async (res) => {
+      if (!res.ok) {
+        return
+      }
+      const data = await res.json();
+      setOrders(data)
+    });
   }, [])
   const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme();
   const handleThemeToggle = () => {
@@ -58,7 +66,7 @@ export default function History() {
             {orders.map((order) => (
               <Paper key={order.id} elevation={3} sx={{ p: 2, mb: 4 }}>
                 <Typography variant="h6" component="h2">
-                  Order #{order.id} - {order.date}
+                  Order #{order.id} - {order.date.toString()}
                 </Typography>
                 <List>
                   {order.items.map((item) => (
@@ -66,7 +74,7 @@ export default function History() {
                       <ListItem>
                         <ListItemText
                           primary={item.title}
-                          secondary={`Quantity: ${item.quantity} - Price: $${item.price}`}
+                          secondary={`Quantity: ${item.quantity} - Price: $${item.price.toFixed(2)}`}
                         />
                       </ListItem>
                       <Divider />
@@ -75,7 +83,7 @@ export default function History() {
                 </List>
                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="h6">
-                    Total: ${getTotalPrice(order.items)}
+                    Total: ${getTotalPrice(order.items).toFixed(2)}
                   </Typography>
                 </Box>
               </Paper>

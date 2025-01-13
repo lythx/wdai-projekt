@@ -1,130 +1,95 @@
 import { useState, useEffect } from 'react';
-import { Container, TextField, Button, Box, Typography, CssBaseline } from '@mui/material';
+import { Container, TextField, Button, Box, Typography, CssBaseline, Paper, List } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Navbar from '../app/components/Navbar';
 import utils from '../app/utils/utils';
+import { useRouter } from 'next/router';
 
-const theme = createTheme();
+interface User {
+  name: string,
+  surname: string,
+  email: string,
+}
 
 export default function Account() {
-  const [user, setUser] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check if the user is logged in
-    utils.validateToken().then(isValid => {
-      setIsLoggedIn(isValid);
-      if (isValid) {
-        // Fetch user data from API and set it to state
-        // Example:
-        // fetchUserData().then(data => setUser(data));
+    fetch("http://localhost:5000/api/user", { headers: utils.getHeadersWithToken() }).then(async (res) => {
+      if (!res.ok) {
+        return
       }
-    });
+      const data = await res.json()
+      console.log(data)
+      setUser(data)
+    }, (err) => {
+      console.log(err)
+    })
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUser(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+  const [darkMode, setDarkMode] = useState(false);
+  useEffect(() => {
+    setDarkMode(localStorage.getItem("darkmode") === "true")
+  }, [])
+  const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme();
+  const handleThemeToggle = () => {
+    setDarkMode(!darkMode);
+    localStorage.setItem("darkmode", !darkMode ? "true" : "false")
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Update user data via API
-    // Example:
-    // updateUser(user).then(response => console.log(response));
-  };
+  const handleLogout = () => {
+    fetch("http://localhost:5000/api/logout", { headers: utils.getHeadersWithToken(), method: 'POST' }).then(async (res) => {
+      router.push('/')
+    }, (err) => {
+      console.log(err)
+    })
+  }
+
+  const [tokenStatus, setTokenStatus] = useState<"valid" | "invalid" | "waiting">("waiting")
+  useEffect(() => {
+    utils.validateToken().then((isValid) => {
+      if (isValid) {
+        setTokenStatus("valid")
+      } else {
+        setTokenStatus("invalid")
+      }
+    })
+  }, [])
+  const router = useRouter()
+
+  console.log(tokenStatus)
+  if (tokenStatus === "invalid") {
+    router.push("/login")
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {/* <Navbar /> */}
-      <Container component="main" maxWidth="xs">
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          {isLoggedIn ? (
-            <>
-              <Typography component="h1" variant="h5">
-                Account
-              </Typography>
-              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="name"
-                  label="Name"
-                  name="name"
-                  autoComplete="name"
-                  autoFocus
-                  value={user.name}
-                  onChange={handleChange}
-                />
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  value={user.email}
-                  onChange={handleChange}
-                />
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  value={user.password}
-                  onChange={handleChange}
-                />
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  sx={{ mt: 3, mb: 2 }}
-                >
-                  Update Account
+      <Navbar darkMode={darkMode} handleThemeToggle={handleThemeToggle} />
+      <Container maxWidth="sm">
+        {tokenStatus !== "valid" || user === null ? <></> :
+          <Box sx={{ mt: 8 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Account
+            </Typography>
+            <Paper elevation={3} sx={{ p: 2, pt: 0.5 }}>
+              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', flexDirection: 'column' }}>
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Name: {user.name}
+                </Typography>
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Surname: {user.surname}
+                </Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Email: {user.email}
+                </Typography>
+                <Button variant="contained" color="primary" onClick={handleLogout} sx={{ width: '50%', alignSelf: 'center' }}>
+                  Logout
                 </Button>
               </Box>
-            </>
-          ) : (
-            <>
-              <Typography component="h1" variant="h5">
-                Please Log In
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                href="/login"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Log In
-              </Button>
-            </>
-          )}
-        </Box>
+            </Paper>
+          </Box>
+        }
       </Container>
     </ThemeProvider>
   );

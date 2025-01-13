@@ -18,7 +18,7 @@ export default function Cart() {
   const [darkMode, setDarkMode] = useState(false);
   useEffect(() => {
     setDarkMode(localStorage.getItem("darkmode") === "true")
-    setCartItems(utils.getCart())
+    setCartItems(utils.getCart().map(a => ({ ...a, quantity: Math.min(a.quantity, a.totalQuantity) })))
   }, [])
   const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme();
   const handleThemeToggle = () => {
@@ -35,8 +35,9 @@ export default function Cart() {
       router.push('/login')
       return
     }
-    fetch("http://localhost:5000/api/order", { method: "POST", headers: utils.getHeaders(), body: JSON.stringify(cartItems) }).then(async (res) => {
-      router.push('/')
+    fetch("http://localhost:5000/api/order", { method: "POST", headers: utils.getHeadersWithToken(), body: JSON.stringify(cartItems.filter(a => a.totalQuantity !== 0)) }).then(async (res) => {
+      utils.setCart([])
+      router.push('/history')
     });
   }
 
@@ -51,7 +52,7 @@ export default function Cart() {
           </Typography>
           <Paper elevation={3} sx={{ p: 2 }}>
             <List>
-              {cartItems.map((item) => (
+              {cartItems.filter(a => a.totalQuantity !== 0).map((item) => (
                 <div key={item.id}>
                   <ListItem>
                     <ListItemText
@@ -60,7 +61,17 @@ export default function Cart() {
                     />
                     <InputLabel sx={{ minWidth: 80, maxWidth: 80 }} >Quantity:</InputLabel>
                     <Input defaultValue={item.quantity} sx={{ minWidth: 50, maxWidth: 50 }} onChange={(e) => {
-                      item.quantity = Number(e.target.value) ?? 0
+                      const newQuantity = Number(e.target.value) ?? 0
+                      if (isNaN(newQuantity)) {
+                        item.quantity = 1
+                      } else if (newQuantity > item.totalQuantity) {
+                        item.quantity = item.totalQuantity
+                      } else if (newQuantity < 1) {
+                        item.quantity = 1
+                      } else {
+                        item.quantity = newQuantity
+                      }
+                      e.target.value = String(item.quantity)
                       utils.setCart([...cartItems])
                       setCartItems([...cartItems])
                     }} />

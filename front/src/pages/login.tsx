@@ -22,6 +22,7 @@ export default function Login() {
     }
     const data = await res.json()
     utils.setTokenCookie(data.token)
+    router.push(localStorage.getItem('fallbackUrl') ?? '/')
   }
 
   const handleRegisterRedirect = () => {

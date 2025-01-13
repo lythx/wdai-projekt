@@ -18,8 +18,8 @@ function validateAndParseToken(req) {
 }
 
 function generateToken(userId) {
-  const data = {time: Date.now(), userId}
+  const data = { time: Date.now(), id: userId }
   return jwt.sign(data, jwtSecretKey);
 }
 
-module.exports = {validateAndParseToken, generateToken}
+module.exports = { validateAndParseToken, generateToken }

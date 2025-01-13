@@ -33,13 +33,7 @@ export default function Register() {
       }
       return
     }
-    const loginRes = await fetch("http://localhost:5000/api/login", {
-      method: "POST", body: JSON.stringify({
-        email, password
-      }), headers
-    })
-    const data = await loginRes.json()
-    utils.setTokenCookie(data.token)
+    router.push('/login')
   };
 
   const handleLoginRedirect = () => {

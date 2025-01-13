@@ -25,9 +25,23 @@ function getHeaders() {
   })
 }
 
+function getHeadersWithToken() {
+  const cookie = document.cookie.split(";").find(a => a.startsWith("token="))
+  if (cookie === undefined) {
+    return getHeaders()
+  }
+  const token = cookie.split("=")[1]
+  const headers = getHeaders()
+  headers.set(tokenHeaderKey, token)
+  return headers
+}
+
 function getCart(): Product[] {
+  if (!global.localStorage) {
+    return []
+  }
   const cart = localStorage.getItem("cart")
-  if (cart === null) {
+  if (cart == null) {
     return []
   }
   return JSON.parse(cart)
@@ -57,4 +71,4 @@ function setTokenCookie(token: string) {
   document.cookie = `token=${token}; expires=${new Date(Date.now() + 1000 * 60 * 60)}; path=/`
 }
 
-export default { validateToken, getHeaders, getCart, setCart, getLightTheme, getDarkTheme, setTokenCookie }
+export default { validateToken, getHeaders, getCart, setCart, getLightTheme, getDarkTheme, setTokenCookie, getHeadersWithToken }

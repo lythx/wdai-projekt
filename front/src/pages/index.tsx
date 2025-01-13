@@ -17,17 +17,27 @@ export default function Index() {
   const [cartItems, setCartItems] = useState<Product[]>([])
 
   useEffect(() => {
+    localStorage.setItem('fallbackUrl', '/')
     const savedTheme = localStorage.getItem('darkmode');
     if (savedTheme) {
       setDarkMode(savedTheme === 'true');
     }
     setCartItems(utils.getCart())
-  }, []);
-
-  useEffect(() => {
     fetch("http://localhost:5000/api/products", { headers: utils.getHeaders() }).then(async (res) => {
-      const data = await res.json();
+      const data: Product[] = await res.json();
+      console.log('DASADS')
+      console.log(data)
       setProducts(data);
+      const cart = utils.getCart()
+      for (const e of cart) {
+        const p = data.find(a => a.id === e.id)
+        if (p === undefined) {
+          continue
+        }
+        e.totalQuantity = p.quantity
+        e.quantity = Math.min(e.quantity, e.totalQuantity)
+      }
+      utils.setCart(cart)
       console.log(data);
     });
     fetch("http://localhost:5000/api/categories").then(async (res) => {
@@ -36,6 +46,7 @@ export default function Index() {
       console.log(data);
     });
   }, []);
+
 
   useEffect(() => {
     localStorage.setItem('darkmode', darkMode.toString());
@@ -51,6 +62,7 @@ export default function Index() {
   const filteredProducts = products.filter(product =>
     (selectedCategories.length === 0 || selectedCategories.includes(product.category)) &&
     product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    && product.quantity !== 0
   );
 
   const theme = darkMode ? utils.getDarkTheme() : utils.getLightTheme()
@@ -85,9 +97,9 @@ export default function Index() {
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ mb: 4 }}
+            sx={{ mb: 1 }}
           />
-          <FormGroup row>
+          <FormGroup row sx={{ mb: 1 }}>
             {categories.map(category => (
               <FormControlLabel
                 key={category}
