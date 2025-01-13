@@ -1,0 +1,390 @@
+{
+	"info": {
+		"_postman_id": "00d71217-133d-43fa-8aa1-26af1f812555",
+		"name": "FakeShop",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39817769"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"John\",\n  \"surname\": \"Doe\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "validate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/validate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/product/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"product",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "categories",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/categories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "new order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\n    \"id\": 1,\n    \"title\": \"Product 1\",\n    \"price\": 10.0,\n    \"description\": \"Description of Product 1\",\n    \"category\": \"Category 1\",\n    \"image\": \"image_url\",\n    \"quantity\": 1,\n    \"totalQuantity\": 10\n  }\n]"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/order",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "by user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Opinion Management",
+			"item": [
+				{
+					"name": "new opinion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product\": 1,\n  \"stars\": 5,\n  \"text\": \"Great product!\",\n  \"name\": \"John\",\n  \"surname\": \"Doe\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/opinion",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"opinion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "opinion",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aW1lIjoxNzMzMTU1NzE1NDIyLCJ1c2VySWQiOjQsImlhdCI6MTczMzE1NTcxNX0.zgQh0VJD670wsGCgKEiAfmyhoo6-l3eF2UjPN_KalyQ"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/opinion",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"opinion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "opinion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/opinions/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"opinions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
